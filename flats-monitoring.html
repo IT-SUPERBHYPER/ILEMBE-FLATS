@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flat Weekly Usage Monitor</title>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+      --warning-color: #f8961e;
+      --danger-color: #f94144;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: var(--dark-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+      background-color: var(--light-color);
+      padding: 15px;
+      border-radius: var(--border-radius);
+    }
+
+    .control-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+
+    input[type="number"],
+    input[type="date"],
+    input[type="text"],
+    select {
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.25);
+    }
+
+    input[type="number"] {
+      width: 80px;
+    }
+
+    .buttons {
+      margin-bottom: 25px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button.primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    button.primary:hover {
+      background-color: var(--secondary-color);
+    }
+
+    button.secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    button.secondary:hover {
+      background-color: #5a6268;
+    }
+
+    button.danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    button.danger:hover {
+      background-color: #d03437;
+    }
+
+    button.success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    button.success:hover {
+      background-color: #218838;
+    }
+
+    button.info {
+      background-color: #17a2b8;
+      color: white;
+    }
+
+    button.info:hover {
+      background-color: #138496;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--box-shadow);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    tr:hover {
+      background-color: #e9ecef;
+    }
+
+    .stats {
+      margin-top: 25px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .stat-card {
+      background-color: white;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .stat-card h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 16px;
+    }
+
+    .stat-card p {
+      margin-bottom: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 400px;
+      margin-top: 30px;
+      background-color: white;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .error {
+      color: var(--danger-color);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .date-input {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .reading-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .single-flat-controls {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: var(--light-color);
+      border-radius: var(--border-radius);
+    }
+
+    .tab-buttons {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--dark-color);
+      transition: var(--transition);
+    }
+
+    .tab-button.active {
+      border-bottom-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+      }
+      
+      .buttons {
+        justify-content: center;
+      }
+      
+      table {
+        font-size: 14px;
+      }
+      
+      th, td {
+        padding: 8px 10px;
+      }
+      
+      .reading-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .tab-buttons {
+        flex-direction: column;
+        border-bottom: none;
+      }
+      
+      .tab-button {
+        border-bottom: none;
+        border-left: 3px solid transparent;
+      }
+      
+      .tab-button.active {
+        border-left-color: var(--primary-color);
+        border-bottom-color: transparent;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>Flat Weekly Usage Monitor</h1>
+
+  <div class="tab-buttons">
+    <button class="tab-button active" onclick="switchTab('all-flats')">All Flats</button>
+    <button class="tab-button" onclick="switchTab('single-flat')">Single Flat</button>
+  </div>
+
+  <div id="all-flats" class="tab-content active">
+    <div class="controls">
+      <div class="control-group">
+        <label for="weekDate">Week Ending:</label>
+        <input type="date" id="weekDate" required>
+      </div>
+      
+      <div class="control-group">
+        <label for="flatCount">Number of Flats:</label>
+        <input type="number" id="flatCount" min="1" max="50" value="5">
+        <button class="secondary" onclick="updateFlatCount()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+          </svg>
+          Update
+        </button>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="primary" onclick="calculateUsage()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+        </svg>
+        Calculate Stats
+      </button>
+      <button class="danger" onclick="resetForm()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+        </svg>
+        Reset
+      </button>
+      <button class="success" onclick="exportToCSV()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+        </svg>
+        Export to CSV
+      </button>
+      <button class="secondary" onclick="document.getElementById('fileInput').click()">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+        </svg>
+        Import Data
+      </button>
+      <input type="file" id="fileInput" accept=".csv,.json" onchange="handleFileImport(this.files)">
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Flat</th>
+            <th>Opening Reading</th>
+            <th>Closing Reading</th>
+            <th>Weekly Usage</th>
+          </tr>
+        </thead>
+        <tbody id="flatTableBody">
+          <!-- Rows will be injected by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="single-flat" class="tab-content">
+    <div class="single-flat-controls">
+      <div class="control-group">
+        <label for="singleFlatWeekDate">Week Ending:</label>
+        <input type="date" id="singleFlatWeekDate" required>
+      </div>
+      <div class="control-group">
+        <label for="selectedFlat">Select Flat:</label>
+        <select id="selectedFlat">
+          <!-- Options will be injected by JavaScript -->
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="singleFlatOpen">Opening Reading:</label>
+        <input type="number" id="singleFlatOpen" step="any" min="0" max="99999" placeholder="Reading">
+        <input type="date" id="singleFlatOpenDate">
+      </div>
+      <div class="control-group">
+        <label for="singleFlatClose">Closing Reading:</label>
+        <input type="number" id="singleFlatClose" step="any" min="0" max="99999" placeholder="Reading">
+        <input type="date" id="singleFlatCloseDate">
+      </div>
+      <div class="buttons">
+        <button class="info" onclick="calculateSingleFlat()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+          </svg>
+          Calculate Single Flat
+        </button>
+        <button class="danger" onclick="resetSingleFlatForm()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+          </svg>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <h2 style="margin-top: 0; color: var(--primary-color);">Single Flat Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Week Ending</h3>
+          <p id="singleFlatWeekDisplay">-</p>
+        </div>
+        <div class="stat-card">
+          <h3>Flat Number</h3>
+          <p id="singleFlatNumber">-</p>
+        </div>
+        <div class="stat-card">
+          <h3>Weekly Usage</h3>
+          <p id="singleFlatUsage">0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats" id="statsDisplay">
+    <h2 style="margin-top: 0; color: var(--primary-color);">Usage Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Week Ending</h3>
+        <p id="weekDisplay">-</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Weekly Usage</h3>
+        <p id="total">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Average Usage</h3>
+        <p id="average">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Highest User</h3>
+        <p id="highest">-</p>
+      </div>
+      <div class="stat-card">
+        <h3>Lowest User</h3>
+        <p id="lowest">-</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="usageChart"></canvas>
+  </div>
+</div>
+
+<script>
+  let numFlats = 5;
+  let usageChart = null;
+  const tbody = document.getElementById("flatTableBody");
+  const today = new Date();
+  document.getElementById("weekDate").valueAsDate = today;
+  document.getElementById("singleFlatWeekDate").valueAsDate = today;
+
+  // Switch between tabs
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    document.getElementById(tabId).classList.add('active');
+    document.querySelector(`.tab-button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+  }
+
+  // Initialize the chart
+  function initChart() {
+    const ctx = document.getElementById('usageChart').getContext('2d');
+    if (usageChart) {
+      usageChart.destroy();
+    }
+    
+    usageChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Array.from({length: numFlats}, (_, i) => `Flat ${i+1}`),
+        datasets: [{
+          label: 'Weekly Usage',
+          data: Array(numFlats).fill(0),
+          backgroundColor: '#4361ee',
+          borderColor: '#3a0ca3',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `Usage: ${context.raw.toFixed(2)}`;
+              }
+            }
+          },
+          datalabels: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Usage',
+              font: {
+                weight: 'bold'
+              }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+  }
+
+  // Generate table rows dynamically
+  function generateTableRows() {
+    tbody.innerHTML = '';
+    const flatSelect = document.getElementById("selectedFlat");
+    flatSelect.innerHTML = '';
+    
+    for (let i = 1; i <= numFlats; i++) {
+      // Add row to main table
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>Flat ${i}</td>
+        <td>
+          <div class="date-input">
+            <div class="reading-container">
+              <input type="number" id="open${i}" step="any" min="0" max="99999" class="form-input" placeholder="Reading">
+              <input type="date" id="openDate${i}" class="form-input">
+            </div>
+            <div id="openError${i}" class="error hidden"></div>
+          </div>
+        </td>
+        <td>
+          <div class="date-input">
+            <div class="reading-container">
+              <input type="number" id="close${i}" step="any" min="0" max="99999" class="form-input" placeholder="Reading">
+              <input type="date" id="closeDate${i}" class="form-input">
+            </div>
+            <div id="closeError${i}" class="error hidden"></div>
+          </div>
+        </td>
+        <td><span id="usage${i}" class="usage-value">0</span></td>
+      `;
+      tbody.appendChild(row);
+      
+      // Add option to single flat dropdown
+      const option = document.createElement("option");
+      option.value = i;
+      option.textContent = `Flat ${i}`;
+      flatSelect.appendChild(option);
+      
+      // Set default dates to today
+      document.getElementById(`openDate${i}`).valueAsDate = new Date();
+      document.getElementById(`closeDate${i}`).valueAsDate = new Date();
+    }
+    
+    // Set default dates for single flat inputs
+    document.getElementById("singleFlatOpenDate").valueAsDate = new Date();
+    document.getElementById("singleFlatCloseDate").valueAsDate = new Date();
+  }
+
+  // Update flat count
+  function updateFlatCount() {
+    const newCount = parseInt(document.getElementById("flatCount").value);
+    if (newCount >= 1 && newCount <= 50) {
+      numFlats = newCount;
+      generateTableRows();
+      initChart();
+      resetStatsDisplay();
+    } else {
+      alert("Please enter a number between 1 and 50");
+    }
+  }
+
+  // Reset stats display
+  function resetStatsDisplay() {
+    document.getElementById("total").textContent = '0';
+    document.getElementById("average").textContent = '0';
+    document.getElementById("highest").textContent = '-';
+    document.getElementById("lowest").textContent = '-';
+    document.getElementById("weekDisplay").textContent = '-';
+  }
+
+  // Validate input values for all flats
+  function validateInputs() {
+    let isValid = true;
+    const weekDate = document.getElementById("weekDate").value;
+    const maxReasonableValue = 1000;
+
+    if (!weekDate) {
+      alert("Please select a week ending date");
+      return false;
+    }
+
+    for (let i = 1; i <= numFlats; i++) {
+      const openInput = document.getElementById(`open${i}`);
+      const closeInput = document.getElementById(`close${i}`);
+      const openDateInput = document.getElementById(`openDate${i}`);
+      const closeDateInput = document.getElementById(`closeDate${i}`);
+      const openError = document.getElementById(`openError${i}`);
+      const closeError = document.getElementById(`closeError${i}`);
+
+      openError.textContent = '';
+      openError.classList.add('hidden');
+      closeError.textContent = '';
+      closeError.classList.add('hidden');
+
+      const open = parseFloat(openInput.value);
+      const close = parseFloat(closeInput.value);
+      const openDate = openDateInput.value;
+      const closeDate = closeDateInput.value;
+
+      if (isNaN(open)) {
+        openError.textContent = 'Please enter a valid number';
+        openError.classList.remove('hidden');
+        isValid = false;
+      } else if (open < 0) {
+        openError.textContent = 'Value cannot be negative';
+        openError.classList.remove('hidden');
+        isValid = false;
+      } else if (open > maxReasonableValue) {
+        openError.textContent = 'Value seems too high';
+        openError.classList.remove('hidden');
+        isValid = false;
+      }
+
+      if (!openDate) {
+        openError.textContent = 'Please select a date';
+        openError.classList.remove('hidden');
+        isValid = false;
+      }
+
+      if (isNaN(close)) {
+        closeError.textContent = 'Please enter a valid number';
+        closeError.classList.remove('hidden');
+        isValid = false;
+      } else if (close < 0) {
+        closeError.textContent = 'Value cannot be negative';
+        closeError.classList.remove('hidden');
+        isValid = false;
+      } else if (close > maxReasonableValue) {
+        closeError.textContent = 'Value seems too high';
+        closeError.classList.remove('hidden');
+        isValid = false;
+      } else if (!isNaN(open) && close < open) {
+        closeError.textContent = 'Closing must be ≥ opening';
+        closeError.classList.remove('hidden');
+        isValid = false;
+      }
+
+      if (!closeDate) {
+        closeError.textContent = 'Please select a date';
+        closeError.classList.remove('hidden');
+        isValid = false;
+      }
+
+      // Validate date sequence
+      if (openDate && closeDate && new Date(closeDate) < new Date(openDate)) {
+        closeError.textContent = 'Closing date must be after opening date';
+        closeError.classList.remove('hidden');
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  }
+
+  // Validate input values for single flat
+  function validateSingleFlatInputs() {
+    const weekDate = document.getElementById("singleFlatWeekDate").value;
+    const flatNumber = document.getElementById("selectedFlat").value;
+    const open = parseFloat(document.getElementById("singleFlatOpen").value);
+    const close = parseFloat(document.getElementById("singleFlatClose").value);
+    const openDate = document.getElementById("singleFlatOpenDate").value;
+    const closeDate = document.getElementById("singleFlatCloseDate").value;
+    const maxReasonableValue = 1000;
+
+    if (!weekDate) {
+      alert("Please select a week ending date");
+      return false;
+    }
+
+    if (!flatNumber) {
+      alert("Please select a flat");
+      return false;
+    }
+
+    if (isNaN(open)) {
+      alert("Please enter a valid opening reading");
+      return false;
+    }
+
+    if (open < 0) {
+      alert("Opening reading cannot be negative");
+      return false;
+    }
+
+    if (open > maxReasonableValue) {
+      alert("Opening reading seems too high");
+      return false;
+    }
+
+    if (!openDate) {
+      alert("Please select an opening date");
+      return false;
+    }
+
+    if (isNaN(close)) {
+      alert("Please enter a valid closing reading");
+      return false;
+    }
+
+    if (close < 0) {
+      alert("Closing reading cannot be negative");
+      return false;
+    }
+
+    if (close > maxReasonableValue) {
+      alert("Closing reading seems too high");
+      return false;
+    }
+
+    if (!closeDate) {
+      alert("Please select a closing date");
+      return false;
+    }
+
+    if (close < open) {
+      alert("Closing reading must be greater than or equal to opening reading");
+      return false;
+    }
+
+    if (new Date(closeDate) < new Date(openDate)) {
+      alert("Closing date must be after opening date");
+      return false;
+    }
+
+    return true;
+  }
+
+  // Calculate usage for all flats
+  function calculateUsage() {
+    if (!validateInputs()) return;
+
+    const weekDate = document.getElementById("weekDate").value;
+    let total = 0;
+    const usages = [];
+    const usageValues = [];
+
+    for (let i = 1; i <= numFlats; i++) {
+      const open = parseFloat(document.getElementById(`open${i}`).value) || 0;
+      const close = parseFloat(document.getElementById(`close${i}`).value) || 0;
+      const openDate = document.getElementById(`openDate${i}`).value;
+      const closeDate = document.getElementById(`closeDate${i}`).value;
+      const usage = close - open;
+      
+      usages.push({ 
+        flat: i, 
+        usage, 
+        opening: open, 
+        closing: close,
+        openDate,
+        closeDate
+      });
+      usageValues.push(usage);
+      document.getElementById(`usage${i}`).textContent = usage.toFixed(2);
+      total += usage;
+    }
+
+    const average = total / numFlats;
+    const highest = usages.reduce((a, b) => a.usage > b.usage ? a : b);
+    const lowest = usages.reduce((a, b) => a.usage < b.usage ? a : b);
+
+    document.getElementById("weekDisplay").textContent = weekDate;
+    document.getElementById("total").textContent = total.toFixed(2);
+    document.getElementById("average").textContent = average.toFixed(2);
+    document.getElementById("highest").textContent = `Flat ${highest.flat} (${highest.usage.toFixed(2)})`;
+    document.getElementById("lowest").textContent = `Flat ${lowest.flat} (${lowest.usage.toFixed(2)})`;
+
+    // Update chart
+    if (usageChart) {
+      usageChart.data.datasets[0].data = usageValues;
+      usageChart.update();
+    }
+
+    // Save data to localStorage
+    const saveData = {
+      weekDate,
+      numFlats,
+      usages,
+      stats: { total, average, highest, lowest }
+    };
+    localStorage.setItem("flatData", JSON.stringify(saveData));
+  }
+
+  // Calculate usage for single flat
+  function calculateSingleFlat() {
+    if (!validateSingleFlatInputs()) return;
+
+    const weekDate = document.getElementById("singleFlatWeekDate").value;
+    const flatNumber = document.getElementById("selectedFlat").value;
+    const open = parseFloat(document.getElementById("singleFlatOpen").value) || 0;
+    const close = parseFloat(document.getElementById("singleFlatClose").value) || 0;
+    const openDate = document.getElementById("singleFlatOpenDate").value;
+    const closeDate = document.getElementById("singleFlatCloseDate").value;
+    const usage = close - open;
+
+    document.getElementById("singleFlatWeekDisplay").textContent = weekDate;
+    document.getElementById("singleFlatNumber").textContent = `Flat ${flatNumber}`;
+    document.getElementById("singleFlatUsage").textContent = usage.toFixed(2);
+
+    // Update the main table if this flat exists there
+    if (document.getElementById(`open${flatNumber}`)) {
+      document.getElementById(`open${flatNumber}`).value = open;
+      document.getElementById(`openDate${flatNumber}`).value = openDate;
+      document.getElementById(`close${flatNumber}`).value = close;
+      document.getElementById(`closeDate${flatNumber}`).value = closeDate;
+      document.getElementById(`usage${flatNumber}`).textContent = usage.toFixed(2);
+    }
+  }
+
+  // Reset single flat form
+  function resetSingleFlatForm() {
+    if (confirm("Are you sure you want to reset the single flat form?")) {
+      document.getElementById("singleFlatWeekDate").valueAsDate = new Date();
+      document.getElementById("singleFlatOpen").value = '';
+      document.getElementById("singleFlatClose").value = '';
+      document.getElementById("singleFlatOpenDate").valueAsDate = new Date();
+      document.getElementById("singleFlatCloseDate").valueAsDate = new Date();
+      document.getElementById("singleFlatWeekDisplay").textContent = '-';
+      document.getElementById("singleFlatNumber").textContent = '-';
+      document.getElementById("singleFlatUsage").textContent = '0';
+    }
+  }
+
+  // Reset form
+  function resetForm() {
+    if (confirm("Are you sure you want to reset all data?")) {
+      document.getElementById("weekDate").valueAsDate = today;
+      document.getElementById("flatCount").value = "5";
+      numFlats = 5;
+      generateTableRows();
+      resetStatsDisplay();
+      resetSingleFlatForm();
+      
+      if (usageChart) {
+        usageChart.data.datasets[0].data = Array(numFlats).fill(0);
+        usageChart.update();
+      }
+      
+      localStorage.removeItem("flatData");
+    }
+  }
+
+  // Export to CSV
+  function exportToCSV() {
+    const weekDate = document.getElementById("weekDate").value || "unspecified_date";
+    let csv = "Flat,Opening Reading,Opening Date,Closing Reading,Closing Date,Weekly Usage\n";
+    
+    for (let i = 1; i <= numFlats; i++) {
+      const open = document.getElementById(`open${i}`).value || 0;
+      const openDate = document.getElementById(`openDate${i}`).value || '';
+      const close = document.getElementById(`close${i}`).value || 0;
+      const closeDate = document.getElementById(`closeDate${i}`).value || '';
+      const usage = (close - open).toFixed(2);
+      csv += `Flat ${i},${open},${openDate},${close},${closeDate},${usage}\n`;
+    }
+
+    const total = document.getElementById("total").textContent;
+    const average = document.getElementById("average").textContent;
+    const highest = document.getElementById("highest").textContent;
+    const lowest = document.getElementById("lowest").textContent;
+
+    csv += `\nWeek Ending,${weekDate}\n`;
+    csv += `Total Weekly Usage,${total}\n`;
+    csv += `Average Usage,${average}\n`;
+    csv += `Highest User,${highest}\n`;
+    csv += `Lowest User,${lowest}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `flat_usage_${weekDate}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Handle file import
+  function handleFileImport(files) {
+    if (files.length === 0) return;
+    
+    const file = files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      try {
+        const content = e.target.result;
+        
+        if (file.name.endsWith('.csv')) {
+          importFromCSV(content);
+        } else if (file.name.endsWith('.json')) {
+          importFromJSON(content);
+        } else {
+          alert("Unsupported file format. Please use CSV or JSON.");
+        }
+      } catch (error) {
+        alert("Error importing file: " + error.message);
+      }
+    };
+    
+    reader.readAsText(file);
+  }
+
+  // Import from CSV
+  function importFromCSV(csvContent) {
+    const lines = csvContent.split('\n');
+    const data = {};
+    
+    // Find week date
+    const weekLine = lines.find(line => line.startsWith('Week Ending,'));
+    if (weekLine) {
+      const weekDate = weekLine.split(',')[1];
+      if (weekDate) {
+        document.getElementById("weekDate").value = weekDate;
+        document.getElementById("singleFlatWeekDate").value = weekDate;
+      }
+    }
+    
+    // Process flat data
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line || line.startsWith('Flat,') || line.startsWith('\n')) continue;
+      
+      const parts = line.split(',');
+      if (parts.length >= 6 && parts[0].startsWith('Flat ')) {
+        const flatNum = parseInt(parts[0].replace('Flat ', ''));
+        const open = parts[1];
+        const openDate = parts[2];
+        const close = parts[3];
+        const closeDate = parts[4];
+        
+        if (flatNum && document.getElementById(`open${flatNum}`)) {
+          document.getElementById(`open${flatNum}`).value = open;
+          document.getElementById(`openDate${flatNum}`).value = openDate;
+          document.getElementById(`close${flatNum}`).value = close;
+          document.getElementById(`closeDate${flatNum}`).value = closeDate;
+        }
+      }
+    }
+    
+    calculateUsage();
+  }
+
+  // Import from JSON
+  function importFromJSON(jsonContent) {
+    const data = JSON.parse(jsonContent);
+    
+    if (data.weekDate) {
+      document.getElementById("weekDate").value = data.weekDate;
+      document.getElementById("singleFlatWeekDate").value = data.weekDate;
+    }
+    
+    if (data.numFlats) {
+      document.getElementById("flatCount").value = data.numFlats;
+      updateFlatCount();
+    }
+    
+    if (data.usages) {
+      data.usages.forEach(flat => {
+        if (document.getElementById(`open${flat.flat}`)) {
+          document.getElementById(`open${flat.flat}`).value = flat.opening;
+          document.getElementById(`openDate${flat.flat}`).value = flat.openDate || '';
+          document.getElementById(`close${flat.flat}`).value = flat.closing;
+          document.getElementById(`closeDate${flat.flat}`).value = flat.closeDate || '';
+        }
+      });
+    }
+    
+    calculateUsage();
+  }
+
+  // Load saved data on page load
+  window.onload = function () {
+    initChart();
+    generateTableRows();
+    
+    const saved = localStorage.getItem("flatData");
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        
+        if (data.weekDate) {
+          document.getElementById("weekDate").value = data.weekDate;
+          document.getElementById("singleFlatWeekDate").value = data.weekDate;
+        }
+        
+        if (data.numFlats) {
+          document.getElementById("flatCount").value = data.numFlats;
+          numFlats = data.numFlats;
+          generateTableRows();
+        }
+        
+        if (data.usages) {
+          data.usages.forEach(f => {
+            if (document.getElementById(`open${f.flat}`)) {
+              document.getElementById(`open${f.flat}`).value = f.opening;
+              document.getElementById(`openDate${f.flat}`).value = f.openDate || '';
+              document.getElementById(`close${f.flat}`).value = f.closing;
+              document.getElementById(`closeDate${f.flat}`).value = f.closeDate || '';
+              document.getElementById(`usage${f.flat}`).textContent = f.usage.toFixed(2);
+            }
+          });
+        }
+        
+        if (data.stats) {
+          document.getElementById("weekDisplay").textContent = data.weekDate || '-';
+          document.getElementById("total").textContent = data.stats.total.toFixed(2);
+          document.getElementById("average").textContent = data.stats.average.toFixed(2);
+          document.getElementById("highest").textContent = `Flat ${data.stats.highest.flat} (${data.stats.highest.usage.toFixed(2)})`;
+          document.getElementById("lowest").textContent = `Flat ${data.stats.lowest.flat} (${data.stats.lowest.usage.toFixed(2)})`;
+          
+          if (usageChart && data.usages) {
+            const usageValues = Array(numFlats).fill(0);
+            data.usages.forEach(f => {
+              if (f.flat <= numFlats) {
+                usageValues[f.flat - 1] = f.usage;
+              }
+            });
+            usageChart.data.datasets[0].data = usageValues;
+            usageChart.update();
+          }
+        }
+      } catch (e) {
+        console.error("Error loading saved data:", e);
+      }
+    }
+  };
+</script>
+
+</body>
+</html>

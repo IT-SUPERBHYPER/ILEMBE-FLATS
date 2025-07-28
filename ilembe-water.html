@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ilembe Water Meter Tracker</title>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+      --warning-color: #f8961e;
+      --danger-color: #f94144;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: var(--dark-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      color: var(--dark-color);
+      margin-bottom: 5px;
+    }
+
+    input[type="number"],
+    input[type="date"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ced4da;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+      box-sizing: border-box;
+    }
+
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.25);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    button.primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    button.primary:hover {
+      background-color: var(--secondary-color);
+    }
+
+    button.danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    button.danger:hover {
+      background-color: #d03437;
+    }
+
+    button.success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    button.success:hover {
+      background-color: #218838;
+    }
+
+    .stats {
+      margin-top: 30px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .stat-card {
+      background-color: white;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .stat-card h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 16px;
+    }
+
+    .stat-card p {
+      margin-bottom: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .error {
+      color: var(--danger-color);
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .reading-row {
+      display: flex;
+      gap: 15px;
+    }
+
+    .reading-input {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .reading-row {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Ilembe Water Meter Tracker</h1>
+
+  <div class="control-group">
+    <label for="readingDate">Reading Date:</label>
+    <input type="date" id="readingDate" required>
+  </div>
+
+  <div class="reading-row">
+    <div class="reading-input">
+      <div class="control-group">
+        <label for="openingReading">Opening Reading:</label>
+        <input type="number" id="openingReading" step="any" min="0" placeholder="Enter opening reading">
+        <div id="openingError" class="error hidden"></div>
+      </div>
+    </div>
+    
+    <div class="reading-input">
+      <div class="control-group">
+        <label for="closingReading">Closing Reading:</label>
+        <input type="number" id="closingReading" step="any" min="0" placeholder="Enter closing reading">
+        <div id="closingError" class="error hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="primary" onclick="calculateUsage()">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+      </svg>
+      Calculate Usage
+    </button>
+    <button class="danger" onclick="resetForm()">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+      </svg>
+      Reset
+    </button>
+  </div>
+
+  <div class="stats">
+    <h2 style="margin-top: 0; color: var(--primary-color);">Water Usage Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Reading Date</h3>
+        <p id="readingDateDisplay">-</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Usage</h3>
+        <p id="totalUsage">0</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="success" onclick="exportToCSV()">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+      </svg>
+      Export to CSV
+    </button>
+  </div>
+</div>
+
+<script>
+  // Set default date to today
+  document.getElementById("readingDate").valueAsDate = new Date();
+
+  // Validate inputs
+  function validateInputs() {
+    const readingDate = document.getElementById("readingDate").value;
+    const openingReading = parseFloat(document.getElementById("openingReading").value);
+    const closingReading = parseFloat(document.getElementById("closingReading").value);
+    const openingError = document.getElementById("openingError");
+    const closingError = document.getElementById("closingError");
+
+    openingError.textContent = '';
+    openingError.classList.add('hidden');
+    closingError.textContent = '';
+    closingError.classList.add('hidden');
+
+    let isValid = true;
+
+    if (!readingDate) {
+      alert("Please select a reading date");
+      return false;
+    }
+
+    if (isNaN(openingReading)) {
+      openingError.textContent = 'Please enter a valid opening reading';
+      openingError.classList.remove('hidden');
+      isValid = false;
+    } else if (openingReading < 0) {
+      openingError.textContent = 'Reading cannot be negative';
+      openingError.classList.remove('hidden');
+      isValid = false;
+    }
+
+    if (isNaN(closingReading)) {
+      closingError.textContent = 'Please enter a valid closing reading';
+      closingError.classList.remove('hidden');
+      isValid = false;
+    } else if (closingReading < 0) {
+      closingError.textContent = 'Reading cannot be negative';
+      closingError.classList.remove('hidden');
+      isValid = false;
+    } else if (!isNaN(openingReading) && closingReading < openingReading) {
+      closingError.textContent = 'Closing reading must be ≥ opening reading';
+      closingError.classList.remove('hidden');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  // Calculate water usage
+  function calculateUsage() {
+    if (!validateInputs()) return;
+
+    const readingDate = document.getElementById("readingDate").value;
+    const openingReading = parseFloat(document.getElementById("openingReading").value);
+    const closingReading = parseFloat(document.getElementById("closingReading").value);
+    const totalUsage = closingReading - openingReading;
+
+    document.getElementById("readingDateDisplay").textContent = readingDate;
+    document.getElementById("totalUsage").textContent = totalUsage.toFixed(2);
+
+    // Save to localStorage
+    const readingData = {
+      date: readingDate,
+      opening: openingReading,
+      closing: closingReading,
+      usage: totalUsage
+    };
+    localStorage.setItem("ilembeWaterReading", JSON.stringify(readingData));
+  }
+
+  // Reset form
+  function resetForm() {
+    if (confirm("Are you sure you want to reset the form?")) {
+      document.getElementById("readingDate").valueAsDate = new Date();
+      document.getElementById("openingReading").value = '';
+      document.getElementById("closingReading").value = '';
+      document.getElementById("readingDateDisplay").textContent = '-';
+      document.getElementById("totalUsage").textContent = '0';
+      localStorage.removeItem("ilembeWaterReading");
+    }
+  }
+
+  // Export to CSV
+  function exportToCSV() {
+    const readingDate = document.getElementById("readingDateDisplay").textContent || "unspecified_date";
+    const opening = document.getElementById("openingReading").value || "0";
+    const closing = document.getElementById("closingReading").value || "0";
+    const usage = document.getElementById("totalUsage").textContent || "0";
+
+    let csv = "Reading Date,Opening Reading,Closing Reading,Total Usage\n";
+    csv += `${readingDate},${opening},${closing},${usage}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ilembe_water_reading_${readingDate}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Load saved data on page load
+  window.onload = function() {
+    const saved = localStorage.getItem("ilembeWaterReading");
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        document.getElementById("readingDate").value = data.date;
+        document.getElementById("openingReading").value = data.opening;
+        document.getElementById("closingReading").value = data.closing;
+        document.getElementById("readingDateDisplay").textContent = data.date;
+        document.getElementById("totalUsage").textContent = data.usage.toFixed(2);
+      } catch (e) {
+        console.error("Error loading saved data:", e);
+      }
+    }
+  };
+</script>
+
+</body>
+</html>
